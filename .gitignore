@@ -1,0 +1,38 @@
+# Bytecode compiled files
+*.pyc
+__pycache__/
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+sdist/
+var/
+develop-eggs/
+*.egg
+
+# PyCharm
+#  JetBrains project files
+.idea/
+
+# Virtual environment directories
+venv/
+ENV/
+.venv/
+
+# Jupyter Notebook files
+.ipynb_checkpoints
+
+# Database files
+*.sqlite3
+
+# Django specific files
+db.sqlite3
+*.log
+
+# Environment variables
+.env
+
+# Compiled translations
+*.mo
+.venv/*
