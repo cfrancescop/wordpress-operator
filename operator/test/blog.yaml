@@ -1,0 +1,9 @@
+apiVersion: gdgitalia.dev/v1
+kind: Wordpress
+metadata:
+  name: devfestpescara2004
+spec:
+  name: devfestpescara2004
+  hostname: devfestpescara2004.gdgitalia.it
+  wp_size: 2Gi
+  mysql_size: 2Gi

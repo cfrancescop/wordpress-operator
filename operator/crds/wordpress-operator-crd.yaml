@@ -1,0 +1,52 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: wordpress.gdgitalia.dev
+spec:
+  group: gdgitalia.dev
+  names:
+    plural: wordpress
+    singular: wordpress
+    kind: Wordpress
+    listKind: WordpressList
+    shortNames:
+      - wp
+  scope: Namespaced
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+                hostname:
+                  type: string
+                wp_size:
+                  type: string
+                mysql_size:
+                  type: string
+              x-kubernetes-preserve-unknown-fields: true
+              required:
+                - name
+                - hostname
+                - wp_size
+                - mysql_size
+            status:
+              type: object
+              x-kubernetes-preserve-unknown-fields: true
+      additionalPrinterColumns:
+        - name: Image
+          type: string
+          description: The message of the echo command
+          jsonPath: .spec.image
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
+  conversion:
+    strategy: None
