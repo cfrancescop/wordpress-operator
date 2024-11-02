@@ -1,0 +1,69 @@
+{% extends 'base.html' %} {% load static %}
+
+{% block title %}Welcome to Our Blog Platform{% endblock %}
+
+{% block content %}
+<section class="jumbotron text-center">
+  <div class="container">
+    <h1 class="jumbotron-heading">Start Sharing Your Story</h1>
+    <p class="lead">
+      Our platform makes it easy to create a beautiful and engaging blog.
+    </p>
+    <p>
+      <a href="/blogs/signup/" class="btn btn-primary my-2">Create Your Blog</a>
+    </p>
+  </div>
+</section>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card mb-4 shadow-sm">
+        <img
+          class="card-img-top"
+          src="{% static 'images/placeholder.png' %}"
+          alt="Placeholder image"
+        />
+        <div class="card-body">
+          <h5 class="card-title">Easy to Use</h5>
+          <p class="card-text">
+            Creating and managing your blog is a breeze with our intuitive
+            interface.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card mb-4 shadow-sm">
+        <img
+          class="card-img-top"
+          src="{% static 'images/placeholder.png' %}"
+          alt="Placeholder image"
+        />
+        <div class="card-body">
+          <h5 class="card-title">Beautiful Designs</h5>
+          <p class="card-text">
+            Choose from a variety of stunning themes to personalize your blog.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card mb-4 shadow-sm">
+        <img
+          class="card-img-top"
+          src="{% static 'images/placeholder.png' %}"
+          alt="Placeholder image"
+        />
+        <div class="card-body">
+          <h5 class="card-title">Share Your Passion</h5>
+          <p class="card-text">
+            Connect with a community of like-minded individuals and share your
+            thoughts and ideas.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

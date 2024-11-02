@@ -16,14 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from accounts import views as accounts_views 
+
+import blogs
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
         # ... other URL patterns
-    path('accounts/', include('django.contrib.auth.urls')),  # For login, logout, etc.
-    path('accounts/signup/', accounts_views.signup, name='signup'),
-    path("polls/", include("polls.urls")),
     path("blogs/", include("blogs.urls")),
+    path("", blogs.views.landing_page),
 ]

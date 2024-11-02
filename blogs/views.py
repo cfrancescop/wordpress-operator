@@ -22,3 +22,6 @@ def signup_success(request):
     """Renders a success page after signup, including a link to the blog's hostname."""
     blog_hostname = request.session.get('blog_hostname', None)  # Retrieve from session
     return render(request, 'blogs/signup_success.html', {'blog_hostname': blog_hostname})
+
+def landing_page(request):
+    return render(request, 'blogs/landing.html')
