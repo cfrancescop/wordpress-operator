@@ -13,4 +13,4 @@ data:
   DB_PORT: "NTQyMg=="  # 5432 base64 encoded
   DB_NAME: "YmxvZ3A="  # blogp base64 encoded
   DB_USER: "YmxvZ3A="  # blogp base64 encoded
-  DB_PASSWORD: "bXlzZWNyZXRwYXNzd29yZA==="  # mysecretpassword base64 encoded 
+  DB_PASSWORD: "bXlzZWNyZXRwYXNzd29yZA=="  # mysecretpassword base64 encoded 

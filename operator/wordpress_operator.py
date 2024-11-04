@@ -190,15 +190,23 @@ def safe_delete(delete_op):
 
 # every minute use the secret to query the postgres database
 @kopf.on.timer('secrets', interval=60.0, annotations={'blog-platform-credentials': kopf.PRESENT})
-async def check_secrets_timer(spec,namespace, **kwargs):
+async def check_secrets_timer(namespace,name, **kwargs):
     """Periodically checks for Secrets with the specified annotation."""
     try:
+        logging.info(f"Polling with secret {name} {namespace}")
         # Extract PostgreSQL connection details from the Secret
-        db_host = base64.b64decode(spec.data['DB_HOST']).decode('utf-8')
-        db_name = base64.b64decode(spec.data['DB_NAME']).decode('utf-8')
-        db_user = base64.b64decode(spec.data['DB_USER']).decode('utf-8')
-        db_password = base64.b64decode(spec.data['DB_PASSWORD']).decode('utf-8')
+        kubernetes.config.load_kube_config()  # Loads from your default kubeconfig
+        api_instance = kubernetes.client.CoreV1Api()
 
+        # Fetch the Secret
+        secret = api_instance.read_namespaced_secret(name, namespace)
+        spec = secret.data
+    
+        db_host = base64.b64decode(spec['DB_HOST']).decode('utf-8')
+        db_name = base64.b64decode(spec['DB_NAME']).decode('utf-8')
+        db_user = base64.b64decode(spec['DB_USER']).decode('utf-8')
+        db_password = base64.b64decode(spec['DB_PASSWORD']).decode('utf-8')
+        logging.info(f"Login with {db_host} {db_name} {db_user}")
         # Create a PostgreSQL connection
         conn = psycopg2.connect(
             host=db_host,
@@ -210,7 +218,7 @@ async def check_secrets_timer(spec,namespace, **kwargs):
 
         # Check for records with 'init=false' in the 'postgres' table
         with conn.cursor() as cur:
-            cur.execute("SELECT name,hostname FROM blogs WHERE init = false;")
+            cur.execute("SELECT title,hostname FROM blogs_blog WHERE init = false;")
             uninitialized_records = cur.fetchall()
 
             for record in uninitialized_records:
@@ -222,7 +230,7 @@ async def check_secrets_timer(spec,namespace, **kwargs):
                     await create_wordpress_resource(name, hostname,namespace)
 
                     # Update the 'init' column to True after successful creation
-                    cur.execute("UPDATE blogs SET init = true WHERE name = %s;", (name,))
+                    cur.execute("UPDATE blogs_blog SET init = true WHERE title = %s;", (name,))
                     conn.commit()
                     logging.info(f"WordPress resource created and initialized for blog: {name}")
 
@@ -251,7 +259,9 @@ async def create_wordpress_resource(name, hostname,namespace):
         },
         "spec": {
             "hostname": hostname,
-            "name": name
+            "name": name,
+            "wp_size": "2Gi",
+            "mysql_size" : "2Gi"
         }
     }
 
@@ -260,7 +270,7 @@ async def create_wordpress_resource(name, hostname,namespace):
         api.create_namespaced_custom_object(
             group="gdgitalia.dev",
             version="v1",
-            namespace="default",  # Replace with your desired namespace
+            namespace=namespace,  # Replace with your desired namespace
             plural="wordpress",
             body=wordpress_resource
         )
