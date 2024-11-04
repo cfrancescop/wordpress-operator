@@ -185,3 +185,84 @@ def safe_delete(delete_op):
             raise e
 
 
+
+
+# every minute use the secret to query the postgres database
+@kopf.on.timer('secrets', interval=60.0, annotations={'blog-platform-credentials': kopf.PRESENT})
+async def check_secrets_timer(spec,namespace, **kwargs):
+    """Periodically checks for Secrets with the specified annotation."""
+    try:
+        # Extract PostgreSQL connection details from the Secret
+        db_host = base64.b64decode(spec.data['DB_HOST']).decode('utf-8')
+        db_name = base64.b64decode(spec.data['DB_NAME']).decode('utf-8')
+        db_user = base64.b64decode(spec.data['DB_USER']).decode('utf-8')
+        db_password = base64.b64decode(spec.data['DB_PASSWORD']).decode('utf-8')
+
+        # Create a PostgreSQL connection
+        conn = psycopg2.connect(
+            host=db_host,
+            database=db_name,
+            user=db_user,
+            password=db_password
+        )
+        logging.info(f"Successfully connected to PostgreSQL database: {db_name}")
+
+        # Check for records with 'init=false' in the 'postgres' table
+        with conn.cursor() as cur:
+            cur.execute("SELECT name,hostname FROM blogs WHERE init = false;")
+            uninitialized_records = cur.fetchall()
+
+            for record in uninitialized_records:
+                name, hostname = record
+                logging.info(f"Creating WordPress resource for blog: {name} ({hostname})")
+
+                # Create WordPress resource using the name and hostname
+                try:
+                    await create_wordpress_resource(name, hostname,namespace)
+
+                    # Update the 'init' column to True after successful creation
+                    cur.execute("UPDATE blogs SET init = true WHERE name = %s;", (name,))
+                    conn.commit()
+                    logging.info(f"WordPress resource created and initialized for blog: {name}")
+
+                except Exception as e:
+                    logging.error(f"Error creating WordPress resource for blog {name}: {e}")
+
+
+        conn.close()
+
+    except psycopg2.Error as e:
+        logging.error(f"Error connecting to PostgreSQL database: {e}")
+    except KeyError as e:
+        logging.error(f"Missing key in Secret data: {e}")   
+
+
+async def create_wordpress_resource(name, hostname,namespace):
+    """Creates a WordPress resource in Kubernetes."""
+    api = kubernetes.client.CustomObjectsApi()
+    # Define the WordPress resource YAML
+    wordpress_resource = {
+        "apiVersion": "gdgitalia.dev/v1",
+        "kind": "Wordpress",
+        "metadata": {
+            "name": name,
+            "namespace": namespace  # Replace with your desired namespace
+        },
+        "spec": {
+            "hostname": hostname,
+            "name": name
+        }
+    }
+
+    try:
+        # Create the resource
+        api.create_namespaced_custom_object(
+            group="gdgitalia.dev",
+            version="v1",
+            namespace="default",  # Replace with your desired namespace
+            plural="wordpress",
+            body=wordpress_resource
+        )
+        logging.info(f"WordPress resource created for blog: {name}")
+    except kubernetes.client.rest.ApiException as e:
+        logging.error(f"Error creating WordPress resource: {e}")
