@@ -5,6 +5,7 @@ import kubernetes
 import yaml
 import os
 import secrets
+import psycopg2
 
 # Define the function to create a MySQL PersistentVolumeClaim
 async def create_mysql_volume(name: str, spec: kopf.Spec, namespace: str, **kwargs):
