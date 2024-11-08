@@ -9,6 +9,6 @@ spec:
     - port: 80
       name: http
   selector:
-    app: wordpress
+    app: {name}
     tier: frontend
   clusterIP: None

@@ -129,7 +129,7 @@ async def create_wordpress_ingress(name: str, spec: kopf.Spec, namespace: str, *
         tmpl = f.read()
     text = tmpl.format(
         name=name,
-        hostname=spec.get('wordpress').get('hostname', f"{name}-wordpress.example.com")
+        hostname=spec.get('hostname', f"{name}.gdgitalia.com")
     )
     data = yaml.safe_load(text)
     kopf.adopt(data)
@@ -151,7 +151,7 @@ async def wordpress_create(body, spec, **kwargs):
         'wordpress-deployment': create_wordpress,
         'wordpress-volume': create_wordpress_volume,
         'wordpress-service': create_wordpress_service,
-        #'wordpress-ingress': create_wordpress_ingress
+        'wordpress-ingress': create_wordpress_ingress
     })
     logging.info(f"WordPress installation: {body.metadata.name} {spec} completed")
 
